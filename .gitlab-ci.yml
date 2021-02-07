@@ -1,0 +1,15 @@
+image: node:latest
+
+build_docs:
+  stage: deploy
+  script:
+  - npm install -g redoc-cli
+  - redoc-cli bundle -o public/index.html docs/specification.yml
+  artifacts:
+    paths:
+    - public
+  only:
+    refs:
+      - master
+    changes:
+      - "docs/*"
