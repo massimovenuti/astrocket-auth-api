@@ -1,14 +1,14 @@
 openapi: "3.0.2"
 info:
   title: Authentification
-  description: Api pour la gestion de l'authentification et des identiter dans le project Asteroid Warrior
+  description: Api pour la gestion de l'authentification et des identités dans le projet Astéroïde Warrior
   version: "1.0"
 servers:
   - url: https://auth.aw.alexandre-vogel.fr/
 
 tags:
   - name: Authentification
-    description: Action relative a l'Authentification d'un utilisateur
+    description: Action relative à l'Authentification d'un utilisateur
   - name: Token
     description: Action liée au token
 
@@ -17,7 +17,7 @@ paths:
     post:
       tags:
         - Authentification
-      summary: Connet un utilisateur
+      summary: Connect un utilisateur
       description: Permet à un utilisateur de se connecter et renvois un tokent pour l'identifier
       parameters:
         - in: header
@@ -33,7 +33,7 @@ paths:
           required: true
           description: Mot de passe de l'utilisateur
       requestBody:
-        description: Demande de conection de l'utilisateur `MyUser`
+        description: Demande de connexion de l'utilisateur `MyUser`
         content:
           json:
             schema:
@@ -49,10 +49,10 @@ paths:
                   example: MyPassword
       responses:
         "200":
-          description: Conection reussi
+          description: Connexion reussi
           headers:
             tokent:
-              description: Token utilisable par l'utilisateur pour sidentifier
+              description: Token utilisable par l'utilisateur pour s'identifier
               schema:
                 type: string
           content:
@@ -67,12 +67,12 @@ paths:
         "400":
           description: Nom d'utilisateur / mot de passe non valide
 
-  /use/check:
+  /user/check:
     post:
       tags:
         - Token
-      summary: Verifie le Token d'un utilisateur
-      description: Verifie le `Token` d'un utilisateur, et renvois les informatiuon lier a l'utilisateur
+      summary: Vérifie le Token d'un utilisateur
+      description: Vérifie le `Token` d'un utilisateur, et renvois les informations liées à l'utilisateur
       parameters:
         - in: header
           name: token
@@ -99,7 +99,7 @@ paths:
               schema:
                 type: string
             role:
-              description: Role de l'utilisateur
+              description: Rôle de l'utilisateur
               schema:
                 type: string
           content:
@@ -115,3 +115,5 @@ paths:
                   role:
                     type: string
                     example: S
+        "400":
+          description: Token non valide
