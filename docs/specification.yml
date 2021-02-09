@@ -80,15 +80,6 @@ paths:
       responses:
         "200":
           description: Information sur l'utilisateur
-          headers:
-            name:
-              description: Nom de l'utilisateur
-              schema:
-                type: string
-            role:
-              description: Rôle de l'utilisateur
-              schema:
-                type: string
           content:
             json:
               schema:
@@ -99,9 +90,11 @@ paths:
                   name:
                     type: string
                     example: MyUser
+                    description: Nom de l'utilisateur
                   role:
                     type: string
                     example: S
+                    description: Rôle de l'utilisateur
         "400":
           description: Token non valide
 
@@ -186,25 +179,6 @@ paths:
         - BDD
       summary: Ajoute un utilisateur
       description: Enregistre un utilisateur dans la base de donnée
-      parameters:
-        - in: header
-          name: username
-          schema:
-            type: string
-          required: true
-          description: Nom unique de l'utilisateur
-        - in: header
-          name: password
-          schema:
-            type: string
-          required: true
-          description: Mot de passe de l'utilisateur
-        - in: header
-          name: email
-          schema:
-            type: string
-          required: true
-          description: Email unique de l'utilisateur
       requestBody:
         content:
           json:
@@ -217,20 +191,18 @@ paths:
                 username:
                   type: string
                   example: user1
+                  description: Nom unique de l'utilisateur
                 password:
                   type: string
                   example: pwd
+                  description: Mot de passe de l'utilisateur
                 email:
                   type: string
                   example: email@email.email       
+                  description: Email unique de l'utilisateur
       responses:
         "200":
           description: Ajout de l'utilisateur réussi
-          headers:
-            token:
-              description: Token pour identifier l'utilisateur
-              schema:
-                type: string
           content: 
             json:
               schema:
@@ -240,6 +212,7 @@ paths:
                   token:
                     type: string
                     example: 7dea256198bb51e501ee2d18da735a006e85ef00d6fde30dbd4c141490db9dc8
+                    description: Token pour identifier l'utilisateur
         "400":
           description: Nom d'utilisateur non valide
         "401":
@@ -251,13 +224,6 @@ paths:
         - Admin
       summary: Ajoute un administrateur
       description: Donne à un utilisateur les droits d'administrateur
-      parameters:
-        - in: header
-          name: username
-          schema:
-            type: string
-          required: true
-          description: Nom unique de l'utilisateur
       requestBody:
         content:
           json:
@@ -268,31 +234,14 @@ paths:
                 username:
                   type: string
                   example: MyUser
+                  description: Nom unique de l'utilisateur
+                token:
+                  type: string
+                  example: 4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55
+                  description: Token de l'administrateur
       responses:
         "200":
           description: Attribution des droits d'administrateur réussie
-          headers:
-            username:
-              description: Nom de l'utilisateur
-              schema:
-                type: string
-            role:
-              description: Rôle de l'utilisateur
-              schema:
-                type: string
-          content: 
-            json:
-              schema:
-                required:
-                  - username
-                  - role
-                properties:
-                  username:
-                    type: string
-                    example: MyUser
-                  role:
-                    type: string
-                    example: A
         "400":
           description: Nom d'utilisateur non valide
         "401":
@@ -304,13 +253,6 @@ paths:
         - Admin
       summary: Baisse les privilèges
       description: Retire les privilèges à un utilisateur
-      parameters:
-        - in: header
-          name: username
-          schema:
-            type: string
-          required: true
-          description: Nom unique de l'utilisateur
       requestBody:
         content:
           json:
@@ -321,31 +263,14 @@ paths:
                 username:
                   type: string
                   example: MyUser
+                  description: Nom unique de l'utilisateur
+                token:
+                  type: string
+                  example: 4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55
+                  description: Token de l'administrateur
       responses:
         "200":
           description: Retrait des privilèges réussi
-          headers:
-            username:
-              description: Nom unique de l'utilisateur
-              schema:
-                type: string
-            role:
-              description: Rôle de l'utilisateur
-              schema:
-                type: string
-          content: 
-            json:
-              schema:
-                required:
-                  - username
-                  - role
-                properties:
-                  username:
-                    type: string
-                    example: MyUser
-                  role:
-                    type: string
-                    example: A
         "400":
           description: Nom d'utilisateur non valide
         "401":
@@ -359,19 +284,6 @@ paths:
         - Admin
       summary: Bannissement d'un utilisateur
       description: Permet le banissement d'un utilisateur par un administrateur
-      parameters:
-        - in: header
-          name: username
-          schema:
-            type: string
-          required: true
-          description: Nom de l'utilisateur à bannir
-        - in: header
-          name: token
-          schema:
-            type: string
-          required: true
-          description: Token de l'administrateur
       requestBody:
         content:
           json:
@@ -383,26 +295,14 @@ paths:
                 username:
                   type: string
                   example: MyUser
+                  description: Nom de l'utilisateur à bannir
                 token:
                   type: string
                   example: 4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55
+                  description: Token de l'administrateur
       responses:
         "200":
           description: Bannissement réussi
-          headers:
-            username:
-              description: Nom unique de l'utilisateur
-              schema:
-                type: string
-          content: 
-            json:
-              schema:
-                required:
-                  - username
-                properties:
-                  username:
-                    type: string
-                    example: MyUser
         "400":
           description: Nom d'utilisateur non valide
         "401":
@@ -418,13 +318,6 @@ paths:
         - BDD
       summary: Lève la suspension
       description: Permet à un administrateur de lever la suspension à un utilisateur
-      parameters:
-        - in: header
-          name: username
-          schema:
-            type: string
-          required: true
-          description: Nom unique de l'utilisateur
       requestBody:
         content:
           json:
@@ -435,23 +328,14 @@ paths:
                 username:
                   type: string
                   example: MyUser
+                  description: Nom unique de l'utilisateur
+                token:
+                  type: string
+                  example: 4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55
+                  description: Token de l'administrateur
       responses:
         "200":
           description: Suspension levé 
-          headers:
-            username:
-              description: Nom unique de l'utilisateur
-              schema:
-                type: string
-          content: 
-            json:
-              schema:
-                required:
-                  - username
-                properties:
-                  username:
-                    type: string
-                    example: username
         "400":
           description: Token non valide
         "401":
