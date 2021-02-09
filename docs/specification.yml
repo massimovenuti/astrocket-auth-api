@@ -458,3 +458,34 @@ paths:
           description: Nom d'utilisateur non valide
         "402":
           description: L'utilisateur n'est pas banni
+
+  /user/remove:
+    post:
+      tags:
+        - Admin
+        - Token
+      summary: Retire un utilisateur
+      description: Permet à un administrateur de retirer un utilisateur
+      requestBody:
+        content:
+          json:
+            schema:
+              required:
+                - username
+                - token
+              properties:
+                username:
+                  type: string
+                  example: MyUser
+                  description: Nom de l'utilisateur à retirer
+                token:
+                  type: string
+                  example: 4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55
+                  description: Token de l'administrateur
+      responses:
+        "200":
+          description: Utilisateur retiré
+        "400":
+          description: Token non valide
+        "401":
+          description: Nom d'utilisateur non valide
