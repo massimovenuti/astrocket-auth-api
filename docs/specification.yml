@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
   title: Authentification
-  description: Api pour la gestion de l'authentification et des identités dans le projet Astéroïde Warrior
+  description: Api pour la gestion de l'authentification et des identités dans le projet Asteroids Warrior
   version: "1.0"
 servers:
   - url: https://auth.aw.alexandre-vogel.fr/
@@ -25,8 +25,8 @@ paths:
     post:
       tags:
         - Authentification
-      summary: Connect un utilisateur
-      description: Permet à un utilisateur de se connecter et renvois un tokent pour l'identifier
+      summary: Connecte un utilisateur
+      description: Permet à un utilisateur de se connecter et renvoie un token pour l'identifier
       requestBody:
         description: Demande de connexion de l'utilisateur `MyUser`
         content:
@@ -46,7 +46,7 @@ paths:
                   description: Mot de passe de l'utilisateur
       responses:
         "200":
-          description: Connexion reussi
+          description: Connexion reussie
           content:
             json:
               schema:
@@ -65,7 +65,7 @@ paths:
       tags:
         - Token
       summary: Vérifie le Token d'un utilisateur
-      description: Vérifie le `Token` d'un utilisateur, et renvois les informations liées à l'utilisateur
+      description: Vérifie le `Token` d'un utilisateur, et renvoie les informations liées à l'utilisateur
       requestBody:
         content:
           json:
@@ -144,7 +144,7 @@ paths:
         - Token
         - Serveurs
       summary: Vérifie le Token d'un serveur
-      description: Vérifie le `Token` d'un serveur, et renvois les informations liées au serveur
+      description: Vérifie le `Token` d'un serveur, et renvoie les informations liées au serveur
       requestBody:
         content:
           json:
