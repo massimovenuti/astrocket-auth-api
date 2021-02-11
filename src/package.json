@@ -1,0 +1,19 @@
+{
+  "name": "aw_api_auth",
+  "version": "1.0.0",
+  "description": "API d'authentification pour Asteroid Warrior",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.unistra.fr/projet-integrateur-cmi21/aw_api_auth"
+  },
+  "author": "PHAN JEAN-LUC, VOGEL ALEXANDRE",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "spdy": "^4.0.2"
+  }
+}
