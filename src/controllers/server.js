@@ -27,7 +27,7 @@ exports.add = (req, res, next) => {
 }
 
 exports.remove = (req, res, next) => {
-    knex('tokens').innerJoin('users', 'tokens.idUser', 'users.idUser').where({ strToken: req.body['user_token'] }).select('role')
+    knex('tokens').innerJoin('users', 'tokens.idUser', 'users.idUser').where({ strToken: req.body['token'] }).select('role')
         .then((data) => {
             if (data[0].role === 'A') {
                 knex('servers').delete().where({ serverName: req.body['name'] })
@@ -47,7 +47,7 @@ exports.remove = (req, res, next) => {
 }
 
 exports.check = (req, res, next) => {
-    knex('tokens').select('serverName').where({ serverToken: req.body['token'] })
+    knex('servers').select('serverName').where({ serverToken: req.body['token'] })
         .then((data) => {
             res.status(200).json({
                 name: data[0].serverName
