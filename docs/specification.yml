@@ -59,6 +59,8 @@ paths:
                     description: Token utilisable par l'utilisateur pour s'identifier
         "400":
           description: Nom d'utilisateur / mot de passe non valide
+        "500":
+          description: Internal Server Error
 
   /user/check:
     post:
@@ -217,6 +219,8 @@ paths:
           description: Nom d'utilisateur non valide
         "401":
           description: L'utilisateur existe déjà
+        "500":
+          description: Internal Server Error
 
   /user/admin:
     post:
@@ -246,6 +250,8 @@ paths:
           description: Nom d'utilisateur non valide
         "401":
           description: L'utilisateur est déjà administrateur
+        "500":
+          description: Internal Server Error
   
   /user/unadmin:
     post:
@@ -275,6 +281,8 @@ paths:
           description: Nom d'utilisateur non valide
         "401":
           description: Les privilèges d'un utilisateur sont déjà limités
+        "500":
+          description: Internal Server Error
 
   /user/ban:
     post:
@@ -373,6 +381,8 @@ paths:
           description: Token non valide
         "401":
           description: Nom d'utilisateur non valide
+        "500":
+          description: Internal Server Error
   
   /server/remove:
     post:
