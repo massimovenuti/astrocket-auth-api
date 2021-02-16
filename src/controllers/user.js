@@ -11,16 +11,16 @@ exports.add = (req, res, next) => {
         pwd: bcrypt.hashSync(req.body['password'], saltRounds),
         email: req.body['email'],
     })
-    .then( () => {
-        res.status(200).send('OK');
-    })
-    .catch((err) => {
-        if (err.code === 'ER_DUP_ENTRY') {
-            res.status(401).send("L'utilisateur existe déjà");
-        } else {
-            res.status(400).send('Bad');
-        }
-    });
+        .then(() => {
+            res.status(200).send('OK');
+        })
+        .catch((err) => {
+            if (err.code === 'ER_DUP_ENTRY') {
+                res.status(401).send("L'utilisateur existe déjà");
+            } else {
+                res.status(400).send('Bad');
+            }
+        });
 }
 
 exports.remove = (req, res, next) => {
@@ -45,32 +45,32 @@ exports.remove = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
-    knex('users').select('idUser', 'pwd').where({username: req.body['username']})
-    .then((data) => {
-        if (bcrypt.compareSync(req.body['password'] ,data[0].pwd)) {
-            let token = crypto.randomBytes(40).toString('hex');
-            knex('tokens').insert({
-                idToken: knex.raw('NEXTVAL(s_users)'),
-                idUser: data[0].idUser,
-                strToken: token,
-                expirationDate: knex.raw('SYSDATE()+1') // not work
-            }).then(()=> {
-                res.status(200).json({
-                    token: token
-                });
-            })
-            .catch((err)=> {
-                console.log(err);
+    knex('users').select('idUser', 'pwd').where({ username: req.body['username'] })
+        .then((data) => {
+            if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
+                let token = crypto.randomBytes(40).toString('hex');
+                knex('tokens').insert({
+                    idToken: knex.raw('NEXTVAL(s_tokens)'),
+                    idUser: data[0].idUser,
+                    strToken: token,
+                    expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
+                }).then(() => {
+                    res.status(200).json({
+                        token: token
+                    });
+                })
+                    .catch((err) => {
+                        console.log(err);
+                        res.status(400).send('Bad');
+                    })
+            } else {
                 res.status(400).send('Bad');
-            })
-        } else {
+            }
+        })
+        .catch((err) => {
+            console.log(err);
             res.status(400).send('Bad');
-        }
-    })
-    .catch((err) => {
-        console.log(err);
-        res.status(400).send('Bad');
-    });
+        });
 }
 
 exports.check = (req, res, next) => {
