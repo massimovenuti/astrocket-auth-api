@@ -11,172 +11,188 @@ exports.add = (req, res, next) => {
         pwd: bcrypt.hashSync(req.body['password'], saltRounds),
         email: req.body['email'],
     })
-    .then(() => {
-        res.status(200).send('OK');
-    })
-    .catch((err) => {
-        if (err.code === 'ER_DUP_ENTRY') {
-            res.status(401).send("L'utilisateur existe déjà");
-        } else {
-            res.status(400).send('Bad');
-        }
-    });
+        .then(() => {
+            res.status(200).send('OK');
+        })
+        .catch((err) => {
+            if (err.code === 'ER_DUP_ENTRY') {
+                res.status(401).send("L'utilisateur existe déjà");
+            } else {
+                console.error(err);
+                res.status(500).send('Internal Server Error');
+            }
+        });
 }
 
 exports.remove = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({strToken: req.body.token})
-    .then( (data) => {
-        if(data[0].role == 'A') {
-            knex('users').where({username: req.body.username}).del()
-            .then ( () => {
-                res.status(200).send('Utilisateur retiré');
-            })
-            .catch((err) => {
-                res.status(401).send('Nom d\'utilisateur non valide');
-            });
-        } else {
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
+        .then((data) => {
+            if (data[0].role == 'A') {
+                knex('users').where({ username: req.body.username }).del()
+                    .then((succes) => {
+                        if (succes) {
+                            res.status(200).send('Utilisateur retiré');
+                        } else {
+                            res.status(401).send('Nom d\'utilisateur non valide');
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        res.status(500).send('Internal Server Error');
+                    });
+            } else {
+                res.status(400).send('Token non valide');
+            }
+        })
+        .catch((err) => {
             res.status(400).send('Token non valide');
-        }
-    })
-    .catch((err) => {
-        res.status(400).send('Token non valide');
-    });
+        });
 }
 
 exports.login = (req, res, next) => {
     knex('users').select('idUser', 'pwd').where({ username: req.body['username'] })
-    .then((data) => {
-        if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
-            let token = crypto.randomBytes(40).toString('hex');
-            knex('tokens').insert({
-                idToken: knex.raw('NEXTVAL(s_tokens)'),
-                idUser: data[0].idUser,
-                strToken: token,
-                expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
-            }).then(() => {
-                res.status(200).json({
-                    token: token
-                });
-            })
-                .catch((err) => {
-                    console.log(err);
-                    res.status(400).send('Bad');
+        .then((data) => {
+            if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
+                let token = crypto.randomBytes(40).toString('hex');
+                knex('tokens').insert({
+                    idToken: knex.raw('NEXTVAL(s_tokens)'),
+                    idUser: data[0].idUser,
+                    strToken: token,
+                    expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
                 })
-        } else {
+                    .then(() => {
+                        res.status(200).json({
+                            token: token
+                        });
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        res.status(500).send('Internal Server Error');
+                    })
+            } else {
+                res.status(400).send('Bad');
+            }
+        })
+        .catch((err) => {
+            console.log(err);
             res.status(400).send('Bad');
-        }
-    })
-    .catch((err) => {
-        console.log(err);
-        res.status(400).send('Bad');
-    });
+        });
 }
 
 exports.check = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('username,role').where({strToken: req.body.token})
-    .then( (data) => {
-        res.status(200).json({
-            username: data[0].username,
-            role: data[0].role
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('username,role').where({ strToken: req.body.token })
+        .then((data) => {
+            res.status(200).json({
+                username: data[0].username,
+                role: data[0].role
+            });
+        })
+        .catch((err) => {
+            res.status(400).send('Token non valide');
         });
-    })
-    .catch((err) => {
-        res.status(400).send('Token non valide');
-    });
 }
 
 exports.ban = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({strToken: req.body.token})
-    .then( (data) => {
-        if(data[0].role == 'A') {
-            knex('users').select('idUser').where({username: req.body.username})
-            .then( (data2) => {
-                knex('bans').insert({
-                    idUser: data2[0].idUser,
-                    banEnd: knex.raw(`(DATE(NOW()) + INTERVAL 14 DAY)`),
-                    //knex.raw('date_add(?, INTERVAL ? day)', [knex.fn.now(), 14])
-                })
-                .then( () => {
-                    res.status(200).send('Bannissement réussi');
-                })
-                .catch( (err) => {
-                    res.status(400).send('Bad');
-                });
-            })
-            .catch( (err) => {
-                res.status(400).send('Nom d\'utilisateur non valide');
-            });
-        } else {
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
+        .then((data) => {
+            if (data[0].role == 'A') {
+                knex('users').select('idUser').where({ username: req.body.username })
+                    .then((data2) => {
+                        knex('bans').insert({
+                            idUser: data2[0].idUser,
+                            banEnd: knex.raw(`(DATE(NOW()) + INTERVAL 14 DAY)`),
+                        })
+                            .then(() => {
+                                res.status(200).send('Bannissement réussi');
+                            })
+                            .catch((err) => {
+                                res.status(400).send('Bad');
+                            });
+                    })
+                    .catch((err) => {
+                        res.status(400).send('Nom d\'utilisateur non valide');
+                    });
+            } else {
+                res.status(402).send('Token non valide');
+            }
+        })
+        .catch((err) => {
             res.status(402).send('Token non valide');
-        }
-    })
-    .catch((err) => {
-        res.status(402).send('Token non valide');
-    });
+        });
 }
 
 exports.unban = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({strToken: req.body.token})
-    .then( (data) => {
-        if(data[0].role == 'A') {
-            knex('users').select('idUser').where({username: req.body.username})
-            .then ( (data2) => {
-                knex('bans').where({idUser: data2[0].idUser}).del()
-                .then( () => {
-                    res.status(200).send('Suspension levé');
-                })
-                .catch( (err) => {
-                    res.status(402).send('L\'utilisateur n\'est pas banni');
-                });
-            })
-            .catch((err) => {
-                res.status(401).send('Nom d\'utilisateur non valide');
-            });
-        } else {
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
+        .then((data) => {
+            if (data[0].role == 'A') {
+                knex('users').select('idUser').where({ username: req.body.username })
+                    .then((data2) => {
+                        knex('bans').where({ idUser: data2[0].idUser }).del()
+                            .then(() => {
+                                res.status(200).send('Suspension levé');
+                            })
+                            .catch((err) => {
+                                res.status(402).send('L\'utilisateur n\'est pas banni');
+                            });
+                    })
+                    .catch((err) => {
+                        res.status(401).send('Nom d\'utilisateur non valide');
+                    });
+            } else {
+                res.status(400).send('Token non valide');
+            }
+        })
+        .catch((err) => {
             res.status(400).send('Token non valide');
-        }
-    })
-    .catch((err) => {
-        res.status(400).send('Token non valide');
-    });
+        });
 }
 
 exports.admin = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({strToken: req.body.token})
-    .then( (data) => {
-        if(data[0].role == 'A') {
-            knex('users').where({username: req.body['username']}).update({role: 'A'})
-            .then ( () => {
-                res.status(200).send('Attribution des droits d\'administrateur réussie');
-            })
-            .catch((err) => {
-                res.status(401).send('Nom d\'utilisateur non valide');
-            });
-        } else {
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
+        .then((data) => {
+            if (data[0].role == 'A') {
+                knex('users').where({ username: req.body['username'] }).update({ role: 'A' })
+                    .then((succes) => {
+                        if (succes) {
+                            res.status(200).send('Attribution des droits d\'administrateur réussie');
+                        } else {
+                            res.status(401).send('Nom d\'utilisateur non valide');
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        res.status(500).send('Internal Server Error');
+                    });
+            } else {
+                res.status(400).send('Token non valide');
+            }
+        })
+        .catch((err) => {
             res.status(400).send('Token non valide');
-        }
-    })
-    .catch((err) => {
-        res.status(400).send('Token non valide');
-    });
+        });
 }
 
 exports.unadmin = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({strToken: req.body.token})
-    .then( (data) => {
-        if(data[0].role == 'A') {
-            knex('users').where({username: req.body['username']}).update({role: 'U'})
-            .then ( () => {
-                res.status(200).send('Retrait des privilèges réussi');
-            })
-            .catch((err) => {
-                res.status(401).send('Nom d\'utilisateur non valide');
-            });
-        } else {
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
+        .then((data) => {
+            if (data[0].role == 'A') {
+                knex('users').where({ username: req.body['username'] }).update({ role: 'U' })
+                    .then((succes) => {
+                        if (succes) {
+                            res.status(200).send('Retrait des privilèges réussi');
+                        } else {
+                            res.status(401).send('Nom d\'utilisateur non valide');
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        res.status(500).send('Internal Server Error');
+                    });
+            } else {
+                res.status(400).send('Token non valide');
+            }
+        })
+        .catch((err) => {
             res.status(400).send('Token non valide');
-        }
-    })
-    .catch((err) => {
-        res.status(400).send('Token non valide');
-    });
+        });
 }
