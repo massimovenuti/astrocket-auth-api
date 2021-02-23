@@ -80,7 +80,7 @@ exports.login = (req, res, next) => {
 }
 
 exports.check = (req, res, next) => {
-    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('username,role').where({ strToken: req.body.token })
+    knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('username', 'role').where({ strToken: req.body.token })
         .then((data) => {
             res.status(200).json({
                 username: data[0].username,
