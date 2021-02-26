@@ -53,17 +53,28 @@ exports.login = (req, res, next) => {
     knex('users').select('idUser', 'pwd').where({ username: req.body['username'] })
         .then((data) => {
             if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
-                let token = crypto.randomBytes(40).toString('hex');
-                knex('tokens').insert({
-                    idToken: knex.raw('NEXTVAL(s_tokens)'),
-                    idUser: data[0].idUser,
-                    strToken: token,
-                    expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
-                })
-                    .then(() => {
-                        res.status(200).json({
-                            token: token
-                        });
+                knex('bans').select('idUser').where({ idUser: data[0].idUser })
+                    .then((data2) => {
+                        if(data2[0]) {
+                            res.status(401).send('Connexion refusée l\'utilisateur est banni');
+                        } else {
+                            let token = crypto.randomBytes(40).toString('hex');
+                            knex('tokens').insert({
+                                idToken: knex.raw('NEXTVAL(s_tokens)'),
+                                idUser: data[0].idUser,
+                                strToken: token,
+                                expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
+                            })
+                                .then(() => {
+                                    res.status(200).json({
+                                        token: token
+                                    });
+                                })
+                                .catch((err) => {
+                                    console.error(err);
+                                    res.status(500).send('Internal Server Error');
+                                })
+                        }
                     })
                     .catch((err) => {
                         console.error(err);

@@ -59,6 +59,8 @@ paths:
                     description: Token utilisable par l'utilisateur pour s'identifier
         "400":
           description: Nom d'utilisateur / mot de passe non valide
+        "401":
+          description: Connexion refusée l'utilisateur est banni
         "500":
           description: Internal Server Error
 
