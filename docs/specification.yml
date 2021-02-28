@@ -13,8 +13,6 @@ tags:
     description: Action liée au token
   - name: Serveurs
     description: Action liée aux serveurs
-  - name: BDD
-    description: Action liée à la base de donnée
   - name: Admin
     description: Action liée aux privilèges
   - name: Ban
@@ -88,7 +86,7 @@ paths:
             json:
               schema:
                 required:
-                  - name
+                  - username
                   - role
                 properties:
                   name:
@@ -180,7 +178,6 @@ paths:
     post:
       tags:
         - Authentification
-        - BDD
       summary: Ajoute un utilisateur
       description: Enregistre un utilisateur dans la base de donnée
       requestBody:
@@ -236,6 +233,7 @@ paths:
             schema:
               required:
                 - username
+                - token
               properties:
                 username:
                   type: string
@@ -267,6 +265,7 @@ paths:
             schema:
               required:
                 - username
+                - token
               properties:
                 username:
                   type: string
@@ -325,7 +324,6 @@ paths:
       tags:
         - Ban
         - Admin
-        - BDD
       summary: Lève la suspension
       description: Permet à un administrateur de lever la suspension à un utilisateur
       requestBody:
@@ -334,6 +332,7 @@ paths:
             schema:
               required:
                 - username
+                - token
               properties:
                 username:
                   type: string
