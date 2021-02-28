@@ -12,7 +12,29 @@ exports.add = (req, res, next) => {
         email: req.body['email'],
     })
         .then(() => {
-            res.status(200).send('OK');
+            knex('users').select('idUser').where({ username: req.body['username'] })
+                .then((data) => {
+                    let token = crypto.randomBytes(40).toString('hex');
+                        knex('tokens').insert({
+                            idToken: knex.raw('NEXTVAL(s_tokens)'),
+                            idUser: data[0].idUser,
+                            strToken: token,
+                            expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
+                        })
+                            .then(() => {
+                                res.status(200).json({
+                                    token: token
+                                });
+                            })
+                            .catch((err) => {
+                                console.error(err);
+                                res.status(500).send('Internal Server Error');
+                            })
+                })
+                .catch((err) => {
+                    console.error(err);
+                    res.status(500).send('Internal Server Error');
+                });
         })
         .catch((err) => {
             if (err.code === 'ER_DUP_ENTRY') {
@@ -29,8 +51,8 @@ exports.remove = (req, res, next) => {
         .then((data) => {
             if (data[0].role == 'A') {
                 knex('users').where({ username: req.body.username }).del()
-                    .then((succes) => {
-                        if (succes) {
+                    .then((success) => {
+                        if (success) {
                             res.status(200).send('Utilisateur retiré');
                         } else {
                             res.status(401).send('Nom d\'utilisateur non valide');
@@ -54,8 +76,8 @@ exports.login = (req, res, next) => {
         .then((data) => {
             if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
                 knex('bans').select('idUser').where({ idUser: data[0].idUser })
-                    .then((data2) => {
-                        if(data2[0]) {
+                    .then((rows) => {
+                        if(rows) {
                             res.status(401).send('Connexion refusée l\'utilisateur est banni');
                         } else {
                             let token = crypto.randomBytes(40).toString('hex');
@@ -81,12 +103,12 @@ exports.login = (req, res, next) => {
                         res.status(500).send('Internal Server Error');
                     })
             } else {
-                res.status(400).send('Bad');
+                res.status(400).send('Nom d\'utilisateur / mot de passe non valide');
             }
         })
         .catch((err) => {
             console.log(err);
-            res.status(400).send('Bad');
+            res.status(400).send('Nom d\'utilisateur / mot de passe non valide');
         });
 }
 
@@ -109,15 +131,26 @@ exports.ban = (req, res, next) => {
             if (data[0].role == 'A') {
                 knex('users').select('idUser').where({ username: req.body.username })
                     .then((data2) => {
-                        knex('bans').insert({
-                            idUser: data2[0].idUser,
-                            banEnd: knex.raw(`(DATE(NOW()) + INTERVAL 14 DAY)`),
-                        })
-                            .then(() => {
-                                res.status(200).send('Bannissement réussi');
+                        knex('bans').select('idUser').where({ idUser: data2[0].idUser })
+                            .then((rows) => {
+                                if(rows) {
+                                    res.status(401).send('L\'utilisateur est déjà banni');
+                                } else {
+                                    knex('bans').insert({
+                                        idUser: data2[0].idUser,
+                                        banEnd: knex.raw(`(DATE(NOW()) + INTERVAL 14 DAY)`),
+                                    })
+                                        .then(() => {
+                                            res.status(200).send('Bannissement réussi');
+                                        })
+                                        .catch((err) => {
+                                            res.status(400).send('Bad');
+                                        });
+                                }
                             })
                             .catch((err) => {
-                                res.status(400).send('Bad');
+                                console.error(err);
+                                res.status(500).send('Internal Server Error');
                             });
                     })
                     .catch((err) => {
@@ -163,11 +196,11 @@ exports.admin = (req, res, next) => {
         .then((data) => {
             if (data[0].role == 'A') {
                 knex('users').where({ username: req.body['username'] }).update({ role: 'A' })
-                    .then((succes) => {
-                        if (succes) {
+                    .then((success) => {
+                        if (success) {
                             res.status(200).send('Attribution des droits d\'administrateur réussie');
                         } else {
-                            res.status(401).send('Nom d\'utilisateur non valide');
+                            res.status(400).send('Nom d\'utilisateur non valide');
                         }
                     })
                     .catch((err) => {
@@ -188,11 +221,11 @@ exports.unadmin = (req, res, next) => {
         .then((data) => {
             if (data[0].role == 'A') {
                 knex('users').where({ username: req.body['username'] }).update({ role: 'U' })
-                    .then((succes) => {
-                        if (succes) {
+                    .then((success) => {
+                        if (success) {
                             res.status(200).send('Retrait des privilèges réussi');
                         } else {
-                            res.status(401).send('Nom d\'utilisateur non valide');
+                            res.status(400).send('Nom d\'utilisateur non valide');
                         }
                     })
                     .catch((err) => {
