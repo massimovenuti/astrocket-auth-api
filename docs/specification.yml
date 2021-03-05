@@ -217,7 +217,11 @@ paths:
         "400":
           description: Nom d'utilisateur non valide
         "401":
-          description: L'utilisateur existe déjà
+          description: L'utilisateur ou l'email existe déjà
+        "402":
+          description: Corps de la requête incorrecte
+        "403":
+          description: Email non valide
         "500":
           description: Internal Server Error
 

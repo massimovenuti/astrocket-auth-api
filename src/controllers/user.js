@@ -5,47 +5,58 @@ const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 
 exports.add = (req, res, next) => {
-    knex('users').insert({
-        idUser: knex.raw('NEXTVAL(s_users)'),
-        username: req.body['username'],
-        pwd: bcrypt.hashSync(req.body['password'], saltRounds),
-        email: req.body['email'],
-    })
-        .then(() => {
-            knex('users').select('idUser').where({ username: req.body['username'] })
-                .then((data) => {
-                    let token = crypto.randomBytes(40).toString('hex');
-                        knex('tokens').insert({
-                            idToken: knex.raw('NEXTVAL(s_tokens)'),
-                            idUser: data[0].idUser,
-                            strToken: token,
-                            expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
-                        })
-                            .then(() => {
-                                res.status(200).json({
-                                    token: token
-                                });
+    const checkUsername = /^[a-zA-Z][a-zA-Z0-9]+$/;
+    const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-z]{2,}/;
+    if(!req.body.username || !req.body.password || !req.body.email) {
+        res.status(402).send("Corps de la requête incorrecte");
+    } else if(!checkUsername.test(req.body.username)){
+        res.status(400).send('Nom d\'utilisateur non valide');
+    } else if(!checkEmail.test(req.body.email)){
+        res.status(403).send('Email non valide');
+    } else {
+        knex('users').insert({
+            idUser: knex.raw('NEXTVAL(s_users)'),
+            username: req.body['username'],
+            pwd: bcrypt.hashSync(req.body['password'], saltRounds),
+            email: req.body['email'],
+        })
+            .then(() => {
+                knex('users').select('idUser').where({ username: req.body['username'] })
+                    .then((data) => {
+                        let token = crypto.randomBytes(40).toString('hex');
+                            knex('tokens').insert({
+                                idToken: knex.raw('NEXTVAL(s_tokens)'),
+                                idUser: data[0].idUser,
+                                strToken: token,
+                                expirationDate: knex.raw('DATE_ADD(NOW(), INTERVAL 1 DAY)')
                             })
-                            .catch((err) => {
-                                console.error(err);
-                                res.status(500).send('Internal Server Error');
-                            })
-                })
-                .catch((err) => {
+                                .then(() => {
+                                    res.status(200).json({
+                                        token: token
+                                    });
+                                })
+                                .catch((err) => {
+                                    console.error(err);
+                                    res.status(500).send('Internal Server Error');
+                                })
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        res.status(500).send('Internal Server Error');
+                    });
+            })
+            .catch((err) => {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    res.status(401).send("L'utilisateur ou l'email existe déjà");
+                } else {
                     console.error(err);
                     res.status(500).send('Internal Server Error');
-                });
-        })
-        .catch((err) => {
-            if (err.code === 'ER_DUP_ENTRY') {
-                res.status(401).send("L'utilisateur existe déjà");
-            } else {
-                console.error(err);
-                res.status(500).send('Internal Server Error');
-            }
-        });
+                }
+            });
+    }
 }
 
+// marche
 exports.remove = (req, res, next) => {
     knex('users').join('tokens', 'users.idUser', '=', 'tokens.idUser').select('role').where({ strToken: req.body.token })
         .then((data) => {
@@ -77,7 +88,7 @@ exports.login = (req, res, next) => {
             if (bcrypt.compareSync(req.body['password'], data[0].pwd)) {
                 knex('bans').select('idUser').where({ idUser: data[0].idUser })
                     .then((rows) => {
-                        if(rows) {
+                        if(rows[0]) {
                             res.status(401).send('Connexion refusée l\'utilisateur est banni');
                         } else {
                             let token = crypto.randomBytes(40).toString('hex');
@@ -133,7 +144,7 @@ exports.ban = (req, res, next) => {
                     .then((data2) => {
                         knex('bans').select('idUser').where({ idUser: data2[0].idUser })
                             .then((rows) => {
-                                if(rows) {
+                                if(rows[0]) {
                                     res.status(401).send('L\'utilisateur est déjà banni');
                                 } else {
                                     knex('bans').insert({
