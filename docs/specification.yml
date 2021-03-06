@@ -56,9 +56,13 @@ paths:
                     example: "4c3769786e6614e562a1602847c15712761eb68e4f1609a60c4f7ad064382d55"
                     description: Token utilisable par l'utilisateur pour s'identifier
         "400":
-          description: Nom d'utilisateur / mot de passe non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
           description: Connexion refusée l'utilisateur est banni
+        "402":
+          description: Nom d'utilisateur non valide
+        "403":
+          description: Mot de passe non valide
         "500":
           description: Internal Server Error
 
@@ -98,6 +102,8 @@ paths:
                     example: S
                     description: Rôle de l'utilisateur
         "400":
+          description: 'Requête invalide : attribut(s) manquant(s)'
+        "401":
           description: Token non valide
 
   /server/add:
@@ -135,10 +141,14 @@ paths:
                     type: string
                     example: 7dea256198bb51e501ee2d18da735a006e85ef00d6fde30dbd4c141490db9dc8
                     description: Token pour identifier le serveur
-        "401":
-          description: Token utilisateur non valide
         "400":
-          description: Le serveur existe déja
+          description: 'Requête invalide : attribut(s) manquant(s)'
+        "401":
+          description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
+          description: Le serveur existe déjà
   
   /server/check:
     post:
@@ -172,6 +182,8 @@ paths:
                     example: MonSuperServeur
                     description: Nom du serveur
         "400":
+          description: Corps de la requête inccorecte
+        "401":
           description: Token non valide
 
   /user/add:
@@ -215,11 +227,11 @@ paths:
                     example: 7dea256198bb51e501ee2d18da735a006e85ef00d6fde30dbd4c141490db9dc8
                     description: Token pour identifier l'utilisateur
         "400":
-          description: Nom d'utilisateur non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
           description: L'utilisateur ou l'email existe déjà
         "402":
-          description: Corps de la requête incorrecte
+          description: Nom d'utilisateur non valide
         "403":
           description: Email non valide
         "500":
@@ -251,8 +263,14 @@ paths:
         "200":
           description: Attribution des droits d'administrateur réussie
         "400":
-          description: Nom d'utilisateur non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
+          description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
+          description: Nom d'utilisateur non valide
+        "404":
           description: L'utilisateur est déjà administrateur
         "500":
           description: Internal Server Error
@@ -283,8 +301,14 @@ paths:
         "200":
           description: Retrait des privilèges réussi
         "400":
-          description: Nom d'utilisateur non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
+          description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
+          description: Nom d'utilisateur non valide
+        "404":
           description: Les privilèges d'un utilisateur sont déjà limités
         "500":
           description: Internal Server Error
@@ -317,11 +341,15 @@ paths:
         "200":
           description: Bannissement réussi
         "400":
-          description: Nom d'utilisateur non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
-          description: L'utilisateur est déjà banni
-        "402":
           description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
+          description: Nom d'utilisateur non valide
+        "404":
+          description: L'utilisateur est déjà banni
 
   /user/unban:
     post:
@@ -350,10 +378,14 @@ paths:
         "200":
           description: Suspension levé 
         "400":
-          description: Token non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
-          description: Nom d'utilisateur non valide
+          description: Token non valide
         "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
+          description: Nom d'utilisateur non valide
+        "404":
           description: L'utilisateur n'est pas banni
 
   /user/remove:
@@ -383,8 +415,12 @@ paths:
         "200":
           description: Utilisateur retiré
         "400":
-          description: Token non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
+          description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
           description: Nom d'utilisateur non valide
         "500":
           description: Internal Server Error
@@ -416,6 +452,12 @@ paths:
         "200":
           description: Serveur retiré
         "400":
-          description: Token non valide
+          description: 'Requête invalide : attribut(s) manquant(s)'
         "401":
+          description: Token non valide
+        "402":
+          description: Le token n'appartient pas à un administrateur
+        "403":
           description: Nom du serveur non valide
+        "500":
+          description: Internal Server Error
