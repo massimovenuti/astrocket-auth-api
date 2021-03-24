@@ -1,2 +1,4 @@
 src/node_modules
 src/.env
+src/keys/auth_server.crt
+src/keys/auth_server.key

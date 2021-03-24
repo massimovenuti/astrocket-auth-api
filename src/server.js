@@ -1,10 +1,22 @@
-const http = require('http');
-const fs = require('fs');
+const spdy = require('spdy')
+const fs = require('fs')
+
 const app = require('./app');
 
-app.set('port', process.env.PORT || 8080);
+const port = 3010
 
-const server = http.createServer(app);
+const options = {
+    key: fs.readFileSync(__dirname + '/keys/auth_server.key'),
+    cert: fs.readFileSync(__dirname + '/keys/auth_server.crt')
+}
 
-server.listen(process.env.PORT || 8080);
-console.log("Server run");
+spdy
+    .createServer(options, app)
+    .listen(port, (error) => {
+        if (error) {
+            console.error(error)
+            return process.exit(1)
+        } else {
+            console.log('Listening on port: ' + port + '.')
+        }
+    })
