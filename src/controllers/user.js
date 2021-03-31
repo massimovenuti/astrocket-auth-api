@@ -7,7 +7,7 @@ const saltRounds = 10;
 
 exports.add = (req, res, next) => {
     const checkUsername = /^[a-zA-Z][a-zA-Z0-9]+$/;
-    const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-z]{2,}/;
+    const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-zA-Z]{2,}/;
     if(!req.body.username || !req.body.password || !req.body.email) {
         res.status(400).send("Requête invalide : attribut(s) manquant(s)");
     } else if(!checkUsername.test(req.body.username)){
