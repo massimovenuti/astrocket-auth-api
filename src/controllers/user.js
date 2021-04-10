@@ -8,7 +8,8 @@ const sleep = require('sleep');
 const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 const saltRounds = 10;
 
-blacklist = [];
+blacklist_add = [];
+blacklist_log = [];
 
 async function ip_checker(blacklist,ip)
 {
@@ -32,7 +33,7 @@ async function ip_checker(blacklist,ip)
 
 exports.add = (req, res, next) => {
 
-    ip_checker(blacklist,requestIp.getClientIp(req));
+    ip_checker(blacklist_add,requestIp.getClientIp(req));
 
     const checkUsername = /^[a-zA-Z][a-zA-Z0-9]+$/;
     const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-zA-Z]{2,}$/;
@@ -124,7 +125,7 @@ exports.remove = (req, res, next) => {
 
 exports.login = (req, res, next) => {
 
-    ip_checker(blacklist,requestIp.getClientIp(req));
+    ip_checker(blacklist_log,requestIp.getClientIp(req));
 
     if(!req.body.username || !req.body.password) {
         res.status(400).send("Requête invalide : attribut(s) manquant(s)");
