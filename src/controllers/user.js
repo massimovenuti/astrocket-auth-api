@@ -3,11 +3,40 @@ const dbConfig = require('../config/dbConfig');
 const knex = require('knex')(dbConfig);
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const requestIp = require('request-ip');
+const sleep = require('sleep');
+const { SSL_OP_EPHEMERAL_RSA } = require('constants');
 const saltRounds = 10;
 
+blacklist_add = [];
+blacklist_log = [];
+
+async function ip_checker(blacklist,ip)
+{
+    console.log(blacklist);
+    var found = 0;
+    for (i=0;i < blacklist.length;i++){
+        if (blacklist[i][0] == ip){
+            blacklist[i][1] ++;
+            if (blacklist[i][1] > 10)
+                sleep.sleep(20);
+            else
+                sleep.sleep(2);
+            found = 1;
+            blacklist.splice(blacklist[i]);
+        } 
+    }
+
+    if (!found)
+        blacklist.push([ip,0]);
+}
+
 exports.add = (req, res, next) => {
+
+    ip_checker(blacklist_add,requestIp.getClientIp(req));
+
     const checkUsername = /^[a-zA-Z][a-zA-Z0-9]+$/;
-    const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-zA-Z]{2,}/;
+    const checkEmail = /^[a-z0-9A-Z-_.]+@[a-z0-9A-Z-_.]+\.[a-zA-Z]{2,}$/;
     if(!req.body.username || !req.body.password || !req.body.email) {
         res.status(400).send("Requête invalide : attribut(s) manquant(s)");
     } else if(!checkUsername.test(req.body.username)){
@@ -95,6 +124,9 @@ exports.remove = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
+
+    ip_checker(blacklist_log,requestIp.getClientIp(req));
+
     if(!req.body.username || !req.body.password) {
         res.status(400).send("Requête invalide : attribut(s) manquant(s)");
     } else {
