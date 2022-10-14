@@ -1,4 +1,4 @@
-# AW_API_Auth
+# Astrocket - API d'authentification
 
 ## Description
 
